@@ -3,6 +3,7 @@ package main
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
 	"io/ioutil"
 	"net/http"
 	"net/url"
@@ -94,4 +95,19 @@ func GetState(client *http.Client) (SaltyState, error) {
 		return state, err
 	}
 	return state, nil
+}
+
+func PlaceBet(player int, ammount int, client *http.Client) error {
+	data := url.Values{
+		"selectedplayer": []string{"player" + string(player)},
+		"wager":          []string{string(ammount)},
+	}
+
+	resp, err := client.PostForm("http://www.saltybet.com/ajax_place_bet.php", data)
+	if err != nil {
+		return err
+	}
+	fmt.Println(data.Encode())
+	fmt.Println(resp.Status)
+	return nil
 }

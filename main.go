@@ -22,8 +22,16 @@ func main() {
 		panic(err)
 	}
 
-	fmt.Println("Wallet Balance: %s", balance)
-	fmt.Println("State: %s", state)
+	fmt.Println("Wallet Balance: ", balance)
+	fmt.Println("State: ", state)
+
+	if state.Status == "open" {
+		err = PlaceBet(1, 200, client)
+		if err != nil {
+			panic(err)
+		}
+		fmt.Println("Bet placed")
+	}
 
 	// An attempt at creating a socket.io client...
 	// I don't know how to open a conection to the saltybet server
