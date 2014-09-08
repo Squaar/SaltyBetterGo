@@ -1,0 +1,23 @@
+<html>
+<head>
+
+<!-- This page listens to the messages from saltybet's socket.io server. -->
+
+
+	<script src="http://www-cdn-twitch.saltybet.com:8000/socket.io/socket.io.js"></script>
+	<script src="http://saltybet.com/j/jquery-2.1.1.min.js" type="text/javascript"></script>
+	<script>
+	$(document).ready(function(){
+		$("body").append("Started...</br>")
+	});
+
+	var socket = io.connect("http://www-cdn-twitch.saltybet.com:8000");
+	socket.on("message", function(data){
+		$("body").append("New Message: " + data + "<br/>")
+	})
+	</script>
+</head>
+<body>
+
+</body>
+</html>
