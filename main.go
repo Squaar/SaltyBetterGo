@@ -7,7 +7,7 @@ import (
 )
 
 func main() {
-	client, err := AuthClient("mdumford99@gmail.com", "hamsters99")
+	client, err := AuthClient("saltyface@gmail.com", "saltyface")
 	if err != nil {
 		panic(err)
 	}
