@@ -103,7 +103,7 @@ func PlaceBet(player int, ammount int, client *http.Client) error {
 		"wager":          []string{string(ammount)},
 	}
 
-	resp, err := client.PostForm("http://www.saltybet.com/ajax_place_bet.php", data)
+	resp, err := client.PostForm("http://www.saltybet.com/ajax_place_bet.php", url.Values{"selectedplayer":{"player1"}, "wager": {"100"}})
 	if err != nil {
 		return err
 	}
