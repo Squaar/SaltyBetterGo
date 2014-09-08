@@ -26,11 +26,11 @@ func main() {
 	fmt.Println("State: ", state)
 
 	if state.Status == "open" {
-		err = PlaceBet(1, 200, client)
+		err = PlaceBet(1, 10, client)
 		if err != nil {
 			panic(err)
 		}
-		fmt.Println("Bet placed")
+		fmt.Println("Bet placed.")
 	}
 
 	// An attempt at creating a socket.io client...

@@ -99,15 +99,14 @@ func GetState(client *http.Client) (SaltyState, error) {
 
 func PlaceBet(player int, ammount int, client *http.Client) error {
 	data := url.Values{
-		"selectedplayer": []string{"player" + string(player)},
-		"wager":          []string{string(ammount)},
+		"selectedplayer": {"player" + strconv.Itoa(player)},
+		"wager":          {strconv.Itoa(ammount)},
 	}
 
-	resp, err := client.PostForm("http://www.saltybet.com/ajax_place_bet.php", url.Values{"selectedplayer":{"player1"}, "wager": {"100"}})
+	resp, err := client.PostForm("http://www.saltybet.com/ajax_place_bet.php", data)
 	if err != nil {
 		return err
 	}
-	fmt.Println(data.Encode())
 	fmt.Println(resp.Status)
 	return nil
 }
