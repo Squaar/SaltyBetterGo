@@ -3,7 +3,6 @@ package main
 import (
 	"encoding/json"
 	"errors"
-	"fmt"
 	"io/ioutil"
 	"net/http"
 	"net/url"
@@ -107,6 +106,8 @@ func PlaceBet(player int, ammount int, client *http.Client) error {
 	if err != nil {
 		return err
 	}
-	fmt.Println(resp.Status)
+	if resp.StatusCode != 200 {
+		return errors.New("Bad http response code.")
+	}
 	return nil
 }
