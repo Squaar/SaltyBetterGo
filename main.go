@@ -6,17 +6,17 @@ import (
 )
 
 func main() {
-	client, err := AuthClient("saltyface@gmail.com", "saltyface")
+	client, err := NewSaltyClient("saltyface@gmail.com", "saltyface")
 	if err != nil {
 		panic(err)
 	}
 
-	balance, err := WalletBalance(client)
+	balance, err := client.GetWalletBalance()
 	if err != nil {
 		panic(err)
 	}
 
-	state, err := GetState(client)
+	state, err := client.GetState()
 	if err != nil {
 		panic(err)
 	}
@@ -25,12 +25,12 @@ func main() {
 	fmt.Println("State: ", state)
 
 	for {
-		newBalance, err := WalletBalance(client)
+		newBalance, err := client.GetWalletBalance()
 		if err != nil {
 			panic(err)
 		}
 
-		newState, err := GetState(client)
+		newState, err := client.GetState()
 		if err != nil {
 			panic(err)
 		}
@@ -39,7 +39,7 @@ func main() {
 		fmt.Println("State: ", newState)
 
 		if newState.Status == "open" {
-			err = PlaceBet(1, 10, client)
+			err = client.PlaceBet(1, 10)
 			if err != nil {
 				panic(err)
 			}

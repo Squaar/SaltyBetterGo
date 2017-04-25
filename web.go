@@ -3,69 +3,17 @@ package main
 import (
 	"encoding/json"
 	"errors"
+	"golang.org/x/net/publicsuffix"
 	"io/ioutil"
 	"net/http"
+	"net/http/cookiejar"
 	"net/url"
 	"strconv"
 )
 
-type cookieJar struct {
-	jar map[string][]*http.Cookie
-}
-
-func (p *cookieJar) SetCookies(u *url.URL, cookies []*http.Cookie) {
-	p.jar[u.Host] = cookies
-}
-
-func (p *cookieJar) Cookies(u *url.URL) []*http.Cookie {
-	return p.jar[u.Host]
-}
-
-func AuthClient(email, pass string) (*http.Client, error) {
-	jar := &cookieJar{jar: make(map[string][]*http.Cookie)}
-	client := &http.Client{Jar: jar}
-
-	data := url.Values{
-		"email":        []string{email},
-		"pword":        []string{pass},
-		"authenticate": []string{"signin"},
-	}
-	resp, err := client.PostForm("http://www.saltybet.com/authenticate?signin=1", data)
-	if err != nil {
-		return nil, err
-	}
-	if resp.StatusCode != 200 && resp.StatusCode != 302 {
-		return nil, errors.New("Bad http response code.")
-	}
-
-	return client, nil
-}
-func WalletBalance(client *http.Client) (int, error) {
-	resp, err := client.Get("http://saltybet.com/ajax_tournament_end.php")
-	if err != nil {
-		return 0, err
-	}
-
-	b, err := ioutil.ReadAll(resp.Body)
-	if err != nil {
-		return 0, err
-	}
-	balance, _ := strconv.Atoi(string(b))
-	return balance, nil
-}
-
-func TournamentBalance(client *http.Client) (int, error) {
-	resp, err := client.Get("http://saltybet.com/ajax_tournament_start.php")
-	if err != nil {
-		return 0, err
-	}
-
-	b, err := ioutil.ReadAll(resp.Body)
-	if err != nil {
-		return 0, err
-	}
-	balance, _ := strconv.Atoi(string(b))
-	return balance, nil
+type SaltyClient struct {
+	http.Client
+	SaltyState //TODO: maybe make this a private var?
 }
 
 type SaltyState struct {
@@ -79,7 +27,59 @@ type SaltyState struct {
 	Remaining string
 }
 
-func GetState(client *http.Client) (SaltyState, error) {
+func NewSaltyClient(email, pass string) (*SaltyClient, error) {
+	jar, err := cookiejar.New(&cookiejar.Options{PublicSuffixList: publicsuffix.List})
+	if err != nil {
+		return nil, err
+	}
+	client := &SaltyClient{http.Client{Jar: jar}, *new(SaltyState)}
+
+	data := url.Values{
+		"email":        []string{email},
+		"pword":        []string{pass},
+		"authenticate": []string{"signin"},
+	}
+
+	resp, err := client.PostForm("http://www.saltybet.com/authenticate?signin=1", data)
+	if err != nil {
+		return nil, err
+	}
+	if resp.StatusCode != 200 && resp.StatusCode != 302 {
+		return nil, errors.New("Bad http response code.")
+	}
+
+	return client, nil
+}
+
+func (client *SaltyClient) GetWalletBalance() (int, error) {
+	resp, err := client.Get("http://saltybet.com/ajax_tournament_end.php")
+	if err != nil {
+		return 0, err
+	}
+
+	b, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return 0, err
+	}
+	balance, _ := strconv.Atoi(string(b))
+	return balance, nil
+}
+
+func (client *SaltyClient) TournamentBalance() (int, error) {
+	resp, err := client.Get("http://saltybet.com/ajax_tournament_start.php")
+	if err != nil {
+		return 0, err
+	}
+
+	b, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return 0, err
+	}
+	balance, _ := strconv.Atoi(string(b))
+	return balance, nil
+}
+
+func (client *SaltyClient) GetState() (SaltyState, error) {
 	var state SaltyState
 	resp, err := client.Get("http://saltybet.com/state.json")
 	if err != nil {
@@ -96,7 +96,7 @@ func GetState(client *http.Client) (SaltyState, error) {
 	return state, nil
 }
 
-func PlaceBet(player int, ammount int, client *http.Client) error {
+func (client *SaltyClient) PlaceBet(player, ammount int) error {
 	data := url.Values{
 		"selectedplayer": {"player" + strconv.Itoa(player)},
 		"wager":          {strconv.Itoa(ammount)},
