@@ -11,34 +11,21 @@ func main() {
 		panic(err)
 	}
 
-	balance, err := client.GetWalletBalance()
-	if err != nil {
-		panic(err)
-	}
-
-	state, err := client.GetState()
-	if err != nil {
-		panic(err)
-	}
-
-	fmt.Println("Wallet Balance: ", balance)
-	fmt.Println("State: ", state)
-
 	for {
-		newBalance, err := client.GetWalletBalance()
+		balance, err := client.GetWalletBalance()
 		if err != nil {
 			panic(err)
 		}
 
-		newState, err := client.GetState()
+		state, err := client.GetState()
 		if err != nil {
 			panic(err)
 		}
 
-		fmt.Println("Wallet Balance: ", newBalance)
-		fmt.Println("State: ", newState)
+		fmt.Println("Wallet Balance: ", balance)
+		fmt.Println("State: ", state)
 
-		if newState.Status == "open" {
+		if state.Status == "open" {
 			err = client.PlaceBet(1, 10)
 			if err != nil {
 				panic(err)
